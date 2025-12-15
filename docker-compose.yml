@@ -31,10 +31,8 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql://longevity_user:longevity_pass_2024@longevity_db:5432/longevity_db
-      - ENVIRONMENT=production
-      - SECRET_KEY=your-secret-key-change-in-production-2024
+    env_file:
+      - ./.env
     volumes:
       - ./backend:/app
     depends_on:

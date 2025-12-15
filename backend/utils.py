@@ -4,32 +4,39 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any
 import pandas as pd
 
-from config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from config import SECRET_KEY, JWT_ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+
+from jwt_service import get_jwt_service
+import hashlib
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    """
+    Hash password using SHA-256 pre-hash + bcrypt.
+    This handles unlimited password length securely.
+    """
+    # Pre-hash with SHA-256 to produce fixed-length output
+    # SHA-256 produces 64 hex characters (well under bcrypt's 72-byte limit)
+    prehashed = hashlib.sha256(password.encode('utf-8')).hexdigest()
+    
+    # Now bcrypt hash the pre-hashed password
+    return pwd_context.hash(prehashed)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # Add the SAME pre-hash here!
+    prehashed = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
+    return pwd_context.verify(prehashed, hashed_password)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    """Create access token using the configured JWT strategy"""
+    jwt_service = get_jwt_service()
+    return jwt_service.create_access_token(data, expires_delta)
 
 def decode_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except JWTError:
-        return None
+    """Decode token using the configured JWT strategy"""
+    jwt_service = get_jwt_service()
+    return jwt_service.decode_token(token)
 
 def calculate_health_analysis(biomarkers: pd.Series, chronological_age: int) -> Dict[str, Any]:
     """Calculate health scores and biological age from biomarkers"""
