@@ -1,14 +1,15 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
 from datetime import timedelta, datetime
 from typing import Optional
-
+from fastapi.responses import Response
 from models import User, UserRole
 from dependencies import get_db, get_current_user
 from utils import hash_password, verify_password
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
 from jwt_service import get_jwt_service
+from middleware.rate_limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -63,7 +64,11 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
     return new_user
 
 @router.post("/login", response_model=Token)
-def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
+@limiter.limit("1/hour") 
+def login(
+    request: Request,
+    response: Response, 
+    user_credentials: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_credentials.email).first()
 
     print("user_details",user)

@@ -9,6 +9,9 @@ import os
 from models import Base
 from dependencies import engine, get_db
 from routes import auth, admin, protected, biomarkers
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from middleware.rate_limiter import limiter, rate_limit_exceeded_handler
 
 # Create logs directory if it doesn't exist
 if not os.path.exists('logs'):
@@ -42,6 +45,13 @@ Base.metadata.create_all(bind=engine)
 
 # FastAPI App
 app = FastAPI(title="Longevity Biomarker API", version="1.0.0")
+
+# Add rate limiter to app state
+app.state.limiter = limiter
+
+# Add custom rate limit exceeded handler
+app.add_exception_handler(RateLimitExceeded, rate_limit_exceeded_handler)
+
 
 # CORS
 app.add_middleware(
