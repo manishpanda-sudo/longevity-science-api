@@ -27,15 +27,15 @@ logging.basicConfig(
 )
 
 # Create logger instance
-logger = logging.getLogger(__name__)
+# logger = logging.getLogger(__name__)
 
 # Set SQLAlchemy logging to see database queries
-logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
-logging.getLogger("uvicorn").setLevel(logging.INFO)
+# logging.getLogger("sqlalchemy.engine").setLevel(logging.DEBUG)
+# logging.getLogger("uvicorn").setLevel(logging.INFO)
 
-logger.info("=" * 60)
-logger.info("Initializing Longevity Biomarker API")
-logger.info("=" * 60)
+# logger.info("=" * 60)
+# logger.info("Initializing Longevity Biomarker API")
+# logger.info("=" * 60)
 
 # Create all tables
 Base.metadata.create_all(bind=engine)

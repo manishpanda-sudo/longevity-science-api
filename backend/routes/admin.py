@@ -4,24 +4,32 @@ from typing import List
 from datetime import datetime
 
 from models import User, UserRole, BiomarkerUpload, AnalysisResult
-from dependencies import get_db, get_current_admin_user
+from dependencies import get_db, get_current_user, get_permission_checker, require_admin
 from routes.auth import UserResponse
+from rbac import PermissionChecker, PermissionRegistry, Action, Resource, ResourceOwnershipValidator
 
 router = APIRouter(prefix="/admin", tags=["Admin"])
 
 @router.get("/users", response_model=List[UserResponse])
 def get_all_users(
-    current_admin: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    checker: PermissionChecker = Depends(require_admin())
 ):
+    """Get all users - Admin only"""
+    checker.require_permission(PermissionRegistry.ADMIN_VIEW_ALL_USERS)
+    
     users = db.query(User).all()
     return users
 
 @router.get("/stats")
 def admin_stats(
-    current_admin: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    checker: PermissionChecker = Depends(require_admin())
 ):
+    """Get system statistics - Admin only"""
+    checker.require_permission(PermissionRegistry.ADMIN_MANAGE_SYSTEM)
+    
     total_users = db.query(User).count()
     total_admins = db.query(User).filter(User.role == UserRole.ADMIN).count()
     total_regular_users = db.query(User).filter(User.role == UserRole.USER).count()
@@ -30,9 +38,9 @@ def admin_stats(
     return {
         "message": "Admin statistics",
         "admin": {
-            "id": current_admin.id,
-            "email": current_admin.email,
-            "full_name": current_admin.full_name
+            "id": current_user.id,
+            "email": current_user.email,
+            "full_name": current_user.full_name
         },
         "stats": {
             "total_users": total_users,
@@ -45,9 +53,13 @@ def admin_stats(
 @router.delete("/users/{user_id}")
 def delete_user(
     user_id: int,
-    current_admin: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    checker: PermissionChecker = Depends(require_admin())
 ):
+    """Delete a user - Admin only"""
+    checker.require_permission(PermissionRegistry.ADMIN_DELETE_USERS)
+    
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -55,7 +67,7 @@ def delete_user(
             detail="User not found"
         )
     
-    if user.id == current_admin.id:
+    if user.id == current_user.id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot delete your own account"
@@ -68,10 +80,11 @@ def delete_user(
 
 @router.get("/all-uploads")
 def get_all_uploads(
-    current_admin: User = Depends(get_current_admin_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    checker: PermissionChecker = Depends(require_admin())
 ):
-    """Get all uploads from all users (admin only)"""
+    """Get all uploads from all users - Admin only"""
+    checker.require_permission(PermissionRegistry.ADMIN_VIEW_ALL_UPLOADS)
     
     uploads = db.query(BiomarkerUpload).order_by(BiomarkerUpload.upload_date.desc()).all()
     

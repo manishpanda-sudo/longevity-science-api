@@ -2,12 +2,19 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from models import User, BiomarkerUpload
-from dependencies import get_db, get_current_user
+from dependencies import get_db, get_current_user,get_permission_checker
+from rbac import PermissionChecker, PermissionRegistry, Resource, ResourceOwnershipValidator
 
 router = APIRouter(prefix="/protected", tags=["Protected"])
 
 @router.get("/user")
-def protected_user_route(current_user: User = Depends(get_current_user)):
+def protected_user_route(
+    current_user: User = Depends(get_current_user),
+    checker: PermissionChecker = Depends(get_permission_checker)
+):
+    """Get current user profile"""
+    checker.require_permission(PermissionRegistry.USER_READ_OWN_PROFILE)
+    
     return {
         "message": "This is a protected route for authenticated users",
         "user": {

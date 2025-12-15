@@ -6,8 +6,9 @@ from typing import Optional
 
 from models import User, UserRole
 from dependencies import get_db, get_current_user
-from utils import hash_password, verify_password, create_access_token
+from utils import hash_password, verify_password
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
+from jwt_service import get_jwt_service
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -64,6 +65,8 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_credentials.email).first()
+
+    print("user_details",user)
     
     if not user or not verify_password(user_credentials.password, user.password_hash):
         raise HTTPException(
@@ -79,8 +82,9 @@ def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
         )
     
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email, "role": user.role.value},
+    jwt_svc = get_jwt_service()
+    access_token = jwt_svc.create_access_token(
+        data={"sub": str(user.id), "role": user.role.value},
         expires_delta=access_token_expires
     )
     

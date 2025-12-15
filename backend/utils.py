@@ -28,15 +28,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     prehashed = hashlib.sha256(plain_password.encode('utf-8')).hexdigest()
     return pwd_context.verify(prehashed, hashed_password)
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Create access token using the configured JWT strategy"""
-    jwt_service = get_jwt_service()
-    return jwt_service.create_access_token(data, expires_delta)
 
-def decode_token(token: str):
-    """Decode token using the configured JWT strategy"""
-    jwt_service = get_jwt_service()
-    return jwt_service.decode_token(token)
 
 def calculate_health_analysis(biomarkers: pd.Series, chronological_age: int) -> Dict[str, Any]:
     """Calculate health scores and biological age from biomarkers"""
