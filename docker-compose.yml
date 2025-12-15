@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  longevity_db:
+    image: postgres:15-alpine
+    container_name: longevity_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: longevity_user
+      POSTGRES_PASSWORD: longevity_pass_2024
+      POSTGRES_DB: longevity_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - longevity_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U longevity_user -d longevity_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - longevity_network
+
+  # FastAPI Backend
+  longevity_api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: longevity_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://longevity_user:longevity_pass_2024@longevity_db:5432/longevity_db
+      - ENVIRONMENT=production
+      - SECRET_KEY=your-secret-key-change-in-production-2024
+    volumes:
+      - ./backend:/app
+    depends_on:
+      longevity_db:
+        condition: service_healthy
+    networks:
+      - longevity_network
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+
+volumes:
+  longevity_postgres_data:
+    driver: local
+
+networks:
+  longevity_network:
+    driver: bridge
