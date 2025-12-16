@@ -1,7 +1,6 @@
-# auth_strategies.py
 from abc import ABC, abstractmethod
 from typing import Optional, Dict, Any
-from jose import jwt, JWTError, ExpiredSignatureError  # ← Import these from jose
+from jose import jwt, JWTError, ExpiredSignatureError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -41,13 +40,13 @@ class HS256Strategy(JWTStrategy):
             payload = jwt.decode(token, self.secret_key, algorithms=["HS256"])
             logger.info(f"✅ HS256: Successfully decoded! payload={payload}")
             return payload
-        except ExpiredSignatureError:  # ← Changed
+        except ExpiredSignatureError:
             logger.warning("⏰ HS256: Token expired")
             return None
-        except JWTError as e:  # ← Changed - catch all JWT errors
+        except JWTError as e:
             logger.warning(f"❌ HS256: Invalid token - {type(e).__name__}: {str(e)}")
             return None
-        except Exception as e:  # ← Add general catch
+        except Exception as e:
             logger.error(f"❌ HS256: Unexpected error - {type(e).__name__}: {str(e)}")
             return None
     
@@ -99,13 +98,13 @@ class RS256Strategy(JWTStrategy):
             payload = jwt.decode(token, self.public_key, algorithms=["RS256"])
             logger.info(f"✅ RS256: Successfully decoded! payload={payload}")
             return payload
-        except ExpiredSignatureError:  # ← Changed
+        except ExpiredSignatureError:
             logger.warning("⏰ RS256: Token expired")
             return None
-        except JWTError as e:  # ← Changed - catch all JWT errors
+        except JWTError as e:
             logger.warning(f"❌ RS256: Invalid token - {type(e).__name__}: {str(e)}")
             return None
-        except Exception as e:  # ← Add general catch
+        except Exception as e:
             logger.error(f"❌ RS256: Unexpected error - {type(e).__name__}: {str(e)}")
             return None
     

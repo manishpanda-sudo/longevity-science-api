@@ -1,2 +1,148 @@
-venv
-backend/logs
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Environment Variables
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+logs/
+*.log
+log/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+
+# Alembic
+alembic/versions/__pycache__/
+alembic/__pycache__/
+
+# Keys and Secrets
+keys/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+
+# Docker
+*.env.docker
+docker-compose.override.yml
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Upload files (if you store uploads locally)
+uploads/
+media/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS specific
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# CSV/Excel test files (optional - remove if you need to track test data)
+*.csv
+*.xlsx
+*.xls

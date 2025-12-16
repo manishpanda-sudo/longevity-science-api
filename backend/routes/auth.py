@@ -8,7 +8,7 @@ from models import User, UserRole
 from dependencies import get_db, get_current_user
 from utils import hash_password, verify_password
 from config import ACCESS_TOKEN_EXPIRE_MINUTES
-from jwt_service import get_jwt_service
+from auth_strategies import get_jwt_service
 from middleware.rate_limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])

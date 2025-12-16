@@ -1,28 +1,9 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey, Enum
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, DateTime, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime
-import enum
 
-Base = declarative_base()
+from models import Base
 
-class UserRole(str, enum.Enum):
-    USER = "user"
-    ADMIN = "admin"
-
-class User(Base):
-    __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
-    full_name = Column(String, nullable=False)
-    password_hash = Column(String, nullable=False)
-    role = Column(Enum(UserRole), default=UserRole.USER, nullable=False)
-    is_active = Column(Integer, default=1)  # 1 = active, 0 = inactive
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    biomarker_uploads = relationship("BiomarkerUpload", back_populates="user", cascade="all, delete-orphan")
 
 class BiomarkerUpload(Base):
     __tablename__ = "biomarker_uploads"
@@ -37,6 +18,7 @@ class BiomarkerUpload(Base):
     user = relationship("User", back_populates="biomarker_uploads")
     biomarker_data = relationship("BiomarkerData", back_populates="upload", cascade="all, delete-orphan")
     analysis_results = relationship("AnalysisResult", back_populates="upload", cascade="all, delete-orphan")
+
 
 class BiomarkerData(Base):
     __tablename__ = "biomarker_data"
@@ -54,6 +36,7 @@ class BiomarkerData(Base):
     
     # Relationships
     upload = relationship("BiomarkerUpload", back_populates="biomarker_data")
+
 
 class AnalysisResult(Base):
     __tablename__ = "analysis_results"
